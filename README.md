@@ -28,6 +28,10 @@ See shipped ``depends.txt``.
 The user-documentation is shipped inside the game.
 Just open the spawner-menu (CPU-menu) and click on the ?-button for help.
 
+For learning Lua read <https://www.lua.org/manual/5.1/>.
+
+For ideas and some scripts look at the shipped ``scripts``-folder and/or <https://wiki.minetest.net/Mods/basic_robot>.
+
 ## Known issues?
 
 See the ``issues``-tab in GitHub-Repository.
