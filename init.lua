@@ -1,5 +1,6 @@
 -- basic_robot by rnd, 2016
 
+local modName = minetest.get_current_modname()
 
 basic_robot = {};
 ----  SETTINGS  ------
@@ -12,8 +13,8 @@ basic_robot.password = "password"; -- IMPORTANT: change it before running mod, p
 basic_robot.bad_inventory_blocks = { -- disallow taking from these nodes inventories to prevent player abuses
 	["craft_guide:sign_wall"] = true,
 }
-basic_robot.maxoperations = 2; -- how many operations (dig, generate energy,..) available per run,  0 = unlimited
-basic_robot.dig_require_energy = true; -- does robot require energy to dig?
+basic_robot.maxoperations = 3; -- how many operations (dig, generate energy,..) available per run,  0 = unlimited
+basic_robot.dig_require_energy = false; -- does robot require energy to dig?
 ----------------------
 
 basic_robot.http_api = minetest.request_http_api(); 
@@ -29,7 +30,7 @@ basic_robot.ids = {}; -- stores maxid for each player
 --[name] = {id = .., maxid = .. }, current id for robot controller, how many robot ids player can use
 
 basic_robot.data.listening = {}; -- which robots listen to chat
-dofile(minetest.get_modpath("basic_robot").."/commands.lua")
+dofile(minetest.get_modpath(modName).."/commands.lua")
 
 local check_code, preprocess_code,is_inside_string;
 
@@ -743,21 +744,21 @@ local robot_spawner_update_form = function (pos, mode)
 		"button[-0.25,7.5;1.25,1;EDIT;EDIT]".. 
 		"button_exit[-0.25,-0.25;1.25,1;OK;SAVE]".. 
 		"button_exit[-0.25, 0.75;1.25,1;spawn;START]"..
-		     "button[-0.25, 1.75;1.25,1;despawn;STOP]"..
-			 "field[0.25,3.;1.,1;id;id;"..id.."]"..
-			 "button[-0.25, 3.6;1.25,1;inventory;storage]"..
-		     "button[-0.25, 4.6;1.25,1;library;library]"..
-		     "button[-0.25, 5.6;1.25,1;help;help]";
+		"button[-0.25, 1.75;1.25,1;despawn;STOP]"..
+		"field[0.25,3.5;1.0,1;id;ID;"..id.."]"..
+		"button[-0.25, 4.1;1.25,1;inventory;INV]"..
+		"button[-0.25, 5.1;1.25,1;library;LIB]"..
+		"button[-0.25, 6.1;1.25,1;help;?]"
 			 
 	else -- when robot clicked
 		form  = 
 		"size[9.5,8]" ..  -- width, height
 		"textarea[1.25,-0.25;8.75,9.8;code;;".. code.."]"..
 		"button_exit[-0.25,-0.25;1.25,1;OK;SAVE]"..
-		     "button[-0.25, 1.75;1.25,1;despawn;STOP]"..
-			 "button[-0.25, 3.6;1.25,1;inventory;storage]"..
-		     "button[-0.25, 4.6;1.25,1;library;library]"..
-		     "button[-0.25, 5.6;1.25,1;help;help]";
+		"button_exit[-0.25, 1.75;1.25,1;despawn;STOP]"..
+		"button[-0.25, 4.1;1.25,1;inventory;INV]"..
+		"button[-0.25, 5.1;1.25,1;library;LIB]"..
+		"button[-0.25, 6.1;1.25,1;help;?]"
 			 
 	end
 		
@@ -791,10 +792,10 @@ code_edit_form = function(pos,name)
 	local list = "";
 	for _,line in pairs(lines) do list = list .. minetest.formspec_escape(line) .. "," end
 	local form = "size[12,9.25]" .. "textlist[0,0;12,8;listname;" .. list .. ";"..selection..";false]" .. 
-	"button[10,8;2,1;INSERT;INSERT LINE]" ..
-	"button[10,8.75;2,1;DELETE;DELETE LINE]" ..
-	"button_exit[2,8.75;2,1;SAVE;SAVE CODE]" ..
-	"button[0,8.75;2,1;UPDATE;UPDATE LINE]"..
+	"button[10,8;2,1;INSERT;INS LINE]" ..
+	"button[10,8.75;2,1;DELETE;DEL LINE]" ..
+	"button_exit[2,8.75;2,1;SAVE;SAVE]" ..
+	"button[0,8.75;2,1;UPDATE;UPD LINE]"..
 	"textarea[0.25,8;10,1;input;;".. input .. "]"
 	return form
 end
@@ -1727,12 +1728,12 @@ end
 
 
 minetest.register_node("basic_robot:spawner", {
-	description = "Spawns robot",
+	description = "Spawns robots",
 	tiles = {"cpu.png"},
 	groups = {cracky=3, mesecon_effector_on = 1},
 	drawtype = "allfaces",
 	paramtype = "light",
-	param1=1,
+	param1=7,
 	walkable = true,
 	alpha = 150,
 	after_place_node = function(pos, placer)
@@ -1760,7 +1761,7 @@ minetest.register_node("basic_robot:spawner", {
 		meta:set_int("id",1); -- initial robot id
 		meta:set_string("name", placer:get_player_name().."1")
 		
-		meta:set_string("infotext", "robot spawner (owned by ".. placer:get_player_name() .. ")")
+		meta:set_string("infotext", "Robot-Spawner (Owned by " .. placer:get_player_name() .. ")")
 		meta:set_string("libpos",pos.x .. " " .. pos.y .. " " .. pos.z)
 		
 		robot_spawner_update_form(pos);
@@ -1812,19 +1813,19 @@ minetest.register_node("basic_robot:spawner", {
 local get_manual_control_form = function(name)
 	local form = 
 			"size[2.5,3]" ..  -- width, height
-			"button[-0.25,-0.25;1.,1;turnleft;TLeft]"..
-			"button[0.75,-0.25;1.,1;forward;GO]"..
-			"button[1.75,-0.25;1.,1;turnright;TRight]"..
-			"button[-0.25,0.75;1.,1;left;LEFT]"..
-			"button[0.75,0.75;1.,1;dig;DIG]"..
-			"button[1.75,0.75;1.,1;right;RIGHT]"..
+			"button[-0.25,-0.25;1.,1;turnleft;TL]"..
+			"button[0.75,-0.25;1.,1;forward;FW]"..
+			"button[1.75,-0.25;1.,1;turnright;TR]"..
+			"button[-0.25,0.75;1.,1;left;LT]"..
+			"button[0.75,0.75;1.,1;dig;DG]"..
+			"button[1.75,0.75;1.,1;right;RT]"..
 			
-			"button[-0.25,1.75;1.,1;down;DOWN]"..
-			"button[0.75,1.75;1.,1;back;BACK]"..
+			"button[-0.25,1.75;1.,1;down;DN]"..
+			"button[0.75,1.75;1.,1;back;BK]"..
 			"button[1.75,1.75;1.,1;up;UP]"..
 			
-			"button[-0.25,2.65;1.,1;digdown;DDown]"..
-			"button[1.75,2.65;1.,1;digup;DUp]";
+			"button[-0.25,2.65;1.,1;digdown;DD]"..
+			"button[1.75,2.65;1.,1;digup;DU]";
 			
 	return form;
 end
