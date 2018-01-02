@@ -940,11 +940,17 @@ minetest.register_entity("basic_robot:robot",{
 		return
 	end,
 	
-	 on_rightclick = function(self, clicker)
-		local text = minetest.formspec_escape(self.code);
-		local form = robot_spawner_update_form(self.spawnpos,1);
-		
-		minetest.show_formspec(clicker:get_player_name(), "robot_worker_" .. self.name, form);
+  on_rightclick = function(self, clicker)
+    local owner = basic_robot.data[self.name].owner
+
+    if owner == clicker:get_player_name() then
+  		local text = minetest.formspec_escape(self.code)
+  		local form = robot_spawner_update_form(self.spawnpos, 1)
+  		
+  		minetest.show_formspec(clicker:get_player_name(), "robot_worker_" .. self.name, form);
+  	else
+      minetest.chat_send_player(clicker, "This robot is not yours. You can not access its menu!")
+  	end
 	 end,
 })
 
