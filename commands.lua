@@ -80,22 +80,21 @@ basic_robot.commands.move = function(name,dir)
 	local obj = basic_robot.data[name].obj;
 	local pos = pos_in_dir(obj, dir)
 	
-	-- can move through walkable nodes
-	if minetest.registered_nodes[minetest.get_node(pos).name].walkable then return end
-	-- up; no levitation!
-	if minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name == "air" and
-		minetest.get_node({x=pos.x,y=pos.y-2,z=pos.z}).name == "air" then 
+	-- can not move through walkable nodes
+	if minetest.registered_nodes[minetest.get_node(pos).name].walkable then
 		return false
 	end
 
+	-- no levitation
+	if not minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-1,z=pos.z}).name].walkable then 
+		if minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y-2,z=pos.z}).name].walkable then
+			pos = {x=pos.x,y=pos.y-1,z=pos.z} -- gravity / jump down
+		else
+			return false -- bot can not fly or swim (yet) and will not hurt itself
+		end
+	end
+
 	obj:moveto(pos, true)
-	
-	-- sit and stand up for model - doenst work for overwriten obj export
-	-- if dir == 5 then-- up
-		-- obj:set_animation({x=0,y=0})
-	-- elseif dir == 6 then -- down
-		-- obj:set_animation({x=81,y=160})
-	-- end
 	
 	return true
 end
@@ -341,13 +340,20 @@ basic_robot.commands.place = function(name,nodename, param2,dir)
 	local pos = pos_in_dir(obj, dir)	
 	local luaent = obj:get_luaentity();
 	if minetest.is_protected(pos,luaent.owner ) then return false end
-	if minetest.get_node(pos).name~="air" then return false end
+
+	if minetest.registered_nodes[minetest.get_node(pos).name].walkable then
+		if not (dir == 6 and not minetest.registered_nodes[minetest.get_node({x=pos.x,y=pos.y+2,z=pos.z}).name].walkable) then
+			return false -- need to jump to place something under the bot
+		end
+	end
 	
 	local spos = obj:get_luaentity().spawnpos; 
 	local meta = minetest.get_meta(spos);
 	local inv = meta:get_inventory();
 	if not inv then return false end
-	if not inv:contains_item("main", ItemStack(nodename)) and meta:get_int("admin")~=1 then return false end
+	if not inv:contains_item("main", ItemStack(nodename)) then -- and meta:get_int("admin")~=1
+		return false
+	end
 	inv:remove_item("main", ItemStack(nodename));	
 	
 	--DS
@@ -360,6 +366,11 @@ basic_robot.commands.place = function(name,nodename, param2,dir)
 				minetest.sound_play(sound,{pos=pos, max_hear_distance = 10})
 			end
 		end
+	end
+	
+	if minetest.registered_nodes[minetest.get_node(pos).name].walkable and dir == 6 then -- jump
+		obj:moveto({x=pos.x,y=pos.y+2,z=pos.z}, true)
+		pos = {x=pos.x,y=pos.y+1,z=pos.z} -- placing at the robots last place
 	end
 	
 	local placename = basic_robot.plant_table[nodename];
