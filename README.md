@@ -2,7 +2,9 @@
 
 ## What is this?
 
-This repository holds the lua-code of a lightweight robot-mod for minetest-multiplayer.
+This repository holds a fork to the lua-code of a lightweight robot-mod for minetest-multiplayer initially created by ``rnd`` called ``basic_robot``.
+
+**ATTENTION**: It may or may not be compatible with the basic_robot-mod written by ``rnd``, because it will get some changes which change the behavior different to the original or may have features the original will not have.
 
 ## How to install?
 
