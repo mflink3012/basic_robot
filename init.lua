@@ -1988,19 +1988,12 @@ minetest.register_entity(
 	
 minetest.register_craft({
 	output = "basic_robot:control",
-	recipe = {
-		{"default:stick"},
-		{"default:mese_crystal"}
-	}
+	recipe = basic_robot.control_recipe
 })
 
 minetest.register_craft({
 	output = "basic_robot:spawner",
-	recipe = {
-		{"default:mese_crystal", "default:mese_crystal","default:mese_crystal"},
-		{"default:mese_crystal", "default:mese_crystal","default:mese_crystal"},
-		{"default:stone", "default:steel_ingot", "default:stone"}
-	}
+	recipe = basic_robot.spawner_recipe
 })
 
 
