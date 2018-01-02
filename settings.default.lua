@@ -8,4 +8,4 @@ basic_robot.bad_inventory_blocks = { -- disallow taking from these nodes invento
   ["craft_guide:sign_wall"] = true,
 }
 basic_robot.maxoperations = 3; -- how many operations (dig, generate energy,..) available per run,  0 = unlimited
-basic_robot.dig_require_energy = false; -- does robot require energy to dig?
+basic_robot.dig_require_energy = true; -- does robot require energy to dig?
