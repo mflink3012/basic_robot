@@ -50,7 +50,6 @@ function getSandboxEnv (name)
 	
 	local env = 
 	{
-		pcall=pcall,
 		robot_version = function() return basic_robot.version end,
 		
 		boost = function(v) 
