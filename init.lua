@@ -2005,3 +2005,7 @@ minetest.register_craft({
 
 minetest.register_privilege("robot", "increased number of allowed active robots")
 minetest.register_privilege("puzzle", "allow player to use puzzle. namespace in robots")
+
+if minetest.settings:get_bool("log_mods") then
+  minetest.log("action", "[mod/" .. modName .. "] loaded.")
+end
