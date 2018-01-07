@@ -1,5 +1,7 @@
 # BASIC_ROBOT
 
+![Screenshot](screenshot.png "Screenshot") 
+
 ## What is this?
 
 This repository holds a fork to the lua-code of a lightweight robot-mod for minetest-multiplayer initially created by ``rnd`` called ``basic_robot``.
